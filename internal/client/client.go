@@ -37,3 +37,21 @@ func (c *ImmuDBClientIfImpl) Login(host string, port int, user string, password 
 func (c *ImmuDBClientIfImpl) Logout() error {
 	return c.client.CloseSession(context.TODO())
 }
+
+func (c *ImmuDBClientIfImpl) IsConnected() bool {
+	return c.client.IsConnected()
+}
+
+func (c *ImmuDBClientIfImpl) CreateDatabase(name string) error {
+	_, err := c.client.CreateDatabaseV2(context.Background(), name, nil)
+
+	return err
+}
+
+func (c *ImmuDBClientIfImpl) CreateTable(tableName string, tableDef string) error {
+
+	params := map[string]interface{}{"name": tableName}
+	_, err := c.client.SQLExec(context.Background(), tableDef, params)
+
+	return err
+}

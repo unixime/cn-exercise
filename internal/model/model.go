@@ -13,11 +13,11 @@ const (
 
 type Payload struct {
 	AccountID   uuid.UUID
-	Name        string
-	BankAccount int
-	Address     string
-	Amount      float64
-	Type        TYPE
+	Name        string  `json:"name"`
+	BankAccount int     `json:"bank_account"`
+	Address     string  `json:"address"`
+	Amount      float64 `json:"amount"`
+	Type        TYPE    `json:"type"`
 }
 
 func NewPayload(name string) *Payload {
