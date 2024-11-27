@@ -5,4 +5,5 @@ type ImmuDBClientIf interface {
 	Logout() error
 	IsConnected() bool
 	CreateDatabase(name string) error
+	CreateTable(tableName string, tableDef string) error
 }

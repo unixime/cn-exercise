@@ -45,6 +45,13 @@ func (c *ImmuDBClientIfImpl) IsConnected() bool {
 func (c *ImmuDBClientIfImpl) CreateDatabase(name string) error {
 	_, err := c.client.CreateDatabaseV2(context.Background(), name, nil)
 
+	//if s.AlreadyExisted {
+	//	return nil
+	//}
+	//if errors.Code(err) == errors.CodInternalError {
+	//	return nil
+	//}
+
 	return err
 }
 
