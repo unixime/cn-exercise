@@ -8,15 +8,16 @@ import (
 
 func TestCreateTransaction(t *testing.T) {
 
-	customer := model.Customer{
-		AccountID: 100,
-		Name:      "John",
-		IBAN:      1234567,
+	const ledger = "default"
+	const collection = "transactions"
+
+	tx := model.Transaction{
+		AccountID: "100",
+		Name:      "John Blake",
+		IBAN:      "IT32C0300203280141759145451",
 		Address:   "foo",
-		Transactions: model.Transaction{
-			Amount: 50,
-			Type:   1,
-		},
+		Amount:    50,
+		Type:      1,
 	}
 
 	c := Client{
@@ -24,19 +25,52 @@ func TestCreateTransaction(t *testing.T) {
 		apiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
 	}
 
-	e := c.RegisterTransaction("default", "default", &customer)
+	e := c.RegisterTransaction(ledger, collection, &tx)
 
 	require.Nil(t, e)
 
 }
 
-func TestLookForCustomerTransactions(t *testing.T) {
+func TestGetTransactionByCustomerName(t *testing.T) {
+
+	const ledger = "default"
+	const collection = "transactions"
+
 	c := Client{
 		url:    "https://vault.immudb.io",
 		apiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
 	}
 
-	e := c.LookForCustomerTransactions("default", "default", "John")
+	e := c.GetTransactionByCustomerName(ledger, collection, "John Blake")
+
+	require.Nil(t, e)
+}
+
+func TestGetTransactionByCustomerUUID(t *testing.T) {
+
+	const ledger = "default"
+	const collection = "transactions"
+
+	c := Client{
+		url:    "https://vault.immudb.io",
+		apiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
+	}
+
+	e := c.GetTransactionByCustomerUUID(ledger, collection, "100")
+
+	require.Nil(t, e)
+}
+
+func TestCollectionExists(t *testing.T) {
+	const ledger = "default"
+	const collection = "transactions"
+
+	c := Client{
+		url:    "https://vault.immudb.io",
+		apiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
+	}
+
+	_, e := c.CollectionExists(ledger, collection)
 
 	require.Nil(t, e)
 }

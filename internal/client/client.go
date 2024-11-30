@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 
@@ -109,6 +110,23 @@ func (c *Client) Login(host string, port int, user string, password string) erro
 	return nil
 }
 
+func (c *Client) CollectionExists(ledger, collection string) (bool, error) {
+	const path = "/ics/api/v1/ledger"
+	reqURL := fmt.Sprintf("%s/%s/%s/collection/%s", c.url, path, ledger, collection)
+	resp, err := http.Get(reqURL)
+	if err != nil {
+		return false, err
+	}
+
+	switch resp.StatusCode {
+	case 200:
+		return false, nil
+	}
+
+	fmt.Println(resp.Body)
+	return true, nil
+}
+
 func (c *Client) NewCollection(ledger string, collection model.Collection) error {
 
 	const path = "/ics/api/v1/ledger"
@@ -139,7 +157,7 @@ func (c *Client) NewCollection(ledger string, collection model.Collection) error
 	return nil
 }
 
-func (c *Client) RegisterTransaction(ledger string, collection string, transaction *model.Customer) error {
+func (c *Client) RegisterTransaction(ledger string, collection string, transaction *model.Transaction) error {
 	const path = "ics/api/v1/ledger"
 	const contentType = "application/json"
 
@@ -172,7 +190,7 @@ func (c *Client) RegisterTransaction(ledger string, collection string, transacti
 	return nil
 }
 
-func (c *Client) LookForCustomerTransactions(ledger string, collection string, name string) error {
+func (c *Client) GetTransactionByCustomerName(ledger string, collection string, name string) error {
 
 	const path = "ics/api/v1/ledger"
 	const contentType = "application/json"
@@ -193,7 +211,7 @@ func (c *Client) LookForCustomerTransactions(ledger string, collection string, n
 		},
 		OrderBy: []query.OrderConstraint{
 			{
-				Field: "_id",
+				Field: "_vault_md.ts",
 				Order: query.DESC,
 			},
 		},
@@ -233,38 +251,79 @@ func (c *Client) LookForCustomerTransactions(ledger string, collection string, n
 	defer resp.Body.Close()
 	return nil
 
-	/*
-		curl -X 'POST'  'https://vault.immudb.io/ics/api/v1/ledger/<ledger>/collection/<collection>/documents/search' \
-		  -H 'accept: application/json' \
-		  -H 'X-API-Key: <APIKEY>' \
-		  -H 'Content-Type: application/json' \
-		  -d '{"query":{"expressions":[{"fieldComparisons":[{"field":"id","operator":"GT","value":7}]}],"limit":0,"orderBy":[{"desc":true,"field":"id"}]},"page":1,"perPage":100}'
-	*/
+}
 
-	/*
-		{
-		  "page": 1,
-		  "perPage": 100,
-		  "keepOpen": true,
-		  "query": {
-		      "expressions": [{
-		          "fieldComparisons": [{
-		              "field": "id1",
-		              "operator": "EQ",
-		              "value": "my_object_id1"
-		          }]
-		      }],
-		      "limit": 0,
-		      "orderBy": [
-		        {
-		          "desc": true,
-		          "field": "id"
-		        }
-		      ]
-		  }
-		}
+func (c *Client) GetTransactionByCustomerUUID(ledger string, collection string, uuid string) error {
 
+	const path = "ics/api/v1/ledger"
+	const contentType = "application/json"
 
-	*/
+	reqURL := fmt.Sprintf("%s/%s/%s/collection/%s/documents/search", c.url, path, ledger, collection)
+
+	qry := query.Query{
+		Expressions: []query.Expression{
+			{
+				[]query.Constraint{
+					{
+						Field:    "uuid",
+						Operator: query.EQUAL,
+						Value:    uuid,
+					},
+				},
+			},
+		},
+		OrderBy: []query.OrderConstraint{
+			{
+				Field: "_vault_md.ts",
+				Order: query.DESC,
+			},
+		},
+		Limit: 0,
+	}
+
+	search := query.Search{
+		KeepOpen: true,
+		Query:    qry,
+		Page:     1,
+		PerPage:  100,
+	}
+
+	data, err := json.Marshal(search)
+
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", reqURL, bytes.NewBuffer(data))
+
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("accept", ": */*")
+	req.Header.Set("X-API-Key", c.apiKey)
+	req.Header.Set("Content-Type", contentType)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	// read response body
+	body, error := io.ReadAll(resp.Body)
+	if error != nil {
+		fmt.Println(error)
+	}
+	// close response body
+	var docs model.SearchResponse
+	if err := json.Unmarshal(body, &docs); err != nil {
+		return err
+	}
+
+	return nil
 
 }
