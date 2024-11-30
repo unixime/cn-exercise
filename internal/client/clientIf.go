@@ -7,3 +7,8 @@ type ImmuDBClientIf interface {
 	CreateDatabase(name string) error
 	CreateTable(tableName string, tableDef string) error
 }
+
+type ClientIf interface {
+	Login(host string, port int, user string, password string) error
+	NewCollection() error
+}

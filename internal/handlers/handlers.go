@@ -29,3 +29,13 @@ func AddTransactionHandler(client client.ImmuDBClientIf) gin.HandlerFunc {
 
 	return fn
 }
+
+func CustomerTransactionHandler() gin.HandlerFunc {
+	fn := func(ctx *gin.Context) {
+		name := ctx.Query("name")
+
+		fmt.Println(name)
+	}
+
+	return fn
+}
