@@ -21,8 +21,8 @@ func TestCreateTransaction(t *testing.T) {
 	}
 
 	c := Client{
-		url:    "https://vault.immudb.io",
-		apiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
+		URL:    "https://vault.immudb.io",
+		ApiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
 	}
 
 	e := c.RegisterTransaction(ledger, collection, &tx)
@@ -37,8 +37,8 @@ func TestGetTransactionByCustomerName(t *testing.T) {
 	const collection = "transactions"
 
 	c := Client{
-		url:    "https://vault.immudb.io",
-		apiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
+		URL:    "https://vault.immudb.io",
+		ApiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
 	}
 
 	e := c.GetTransactionByCustomerName(ledger, collection, "John Blake")
@@ -52,8 +52,8 @@ func TestGetTransactionByCustomerUUID(t *testing.T) {
 	const collection = "transactions"
 
 	c := Client{
-		url:    "https://vault.immudb.io",
-		apiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
+		URL:    "https://vault.immudb.io",
+		ApiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
 	}
 
 	e := c.GetTransactionByCustomerUUID(ledger, collection, "100")
@@ -66,8 +66,8 @@ func TestCollectionExists(t *testing.T) {
 	const collection = "transactions"
 
 	c := Client{
-		url:    "https://vault.immudb.io",
-		apiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
+		URL:    "https://vault.immudb.io",
+		ApiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
 	}
 
 	_, e := c.CollectionExists(ledger, collection)

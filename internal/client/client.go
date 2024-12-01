@@ -96,13 +96,22 @@ func (c *ImmuDBClientIfImpl) Insert(tableName string, payload model.Payload) err
 }
 
 type Client struct {
-	url    string
-	apiKey string
+	URL    string
+	ApiKey string
+}
+
+type Response struct {
+	Code int
+	Msg  string
+}
+
+func (r *Response) Error() string {
+	return fmt.Sprintf("%d: %s", r.Code, r.Msg)
 }
 
 func NewClient(apiKey string, url string) *Client {
 
-	return &Client{apiKey: apiKey, url: url}
+	return &Client{ApiKey: apiKey, URL: url}
 }
 
 func (c *Client) Login(host string, port int, user string, password string) error {
@@ -112,7 +121,7 @@ func (c *Client) Login(host string, port int, user string, password string) erro
 
 func (c *Client) CollectionExists(ledger, collection string) (bool, error) {
 	const path = "/ics/api/v1/ledger"
-	reqURL := fmt.Sprintf("%s/%s/%s/collection/%s", c.url, path, ledger, collection)
+	reqURL := fmt.Sprintf("%s/%s/%s/collection/%s", c.URL, path, ledger, collection)
 	resp, err := http.Get(reqURL)
 	if err != nil {
 		return false, err
@@ -132,7 +141,7 @@ func (c *Client) NewCollection(ledger string, collection model.Collection) error
 	const path = "/ics/api/v1/ledger"
 	const contentType = "application/json"
 
-	reqURL := fmt.Sprintf("%s/%s/%s/collection/%s", c.url, path, ledger, collection.Name())
+	reqURL := fmt.Sprintf("%s/%s/%s/collection/%s", c.URL, path, ledger, collection.Name())
 
 	//https: //vault.immudb.io/ics/api/v1/ledger/{ledger}/collection/{collection}
 	fmt.Println(collection.AsJSON())
@@ -143,7 +152,7 @@ func (c *Client) NewCollection(ledger string, collection model.Collection) error
 	}
 
 	req.Header.Set("accept", ": */*")
-	req.Header.Set("X-API-Key", c.apiKey)
+	req.Header.Set("X-API-Key", c.ApiKey)
 	req.Header.Set("Content-Type", contentType)
 
 	client := &http.Client{}
@@ -157,45 +166,51 @@ func (c *Client) NewCollection(ledger string, collection model.Collection) error
 	return nil
 }
 
-func (c *Client) RegisterTransaction(ledger string, collection string, transaction *model.Transaction) error {
+func (c *Client) RegisterTransaction(ledger string, collection string, transaction *model.Transaction) *Response {
 	const path = "ics/api/v1/ledger"
 	const contentType = "application/json"
 
-	reqURL := fmt.Sprintf("%s/%s/%s/collection/%s/document", c.url, path, ledger, collection)
+	reqURL := fmt.Sprintf("%s/%s/%s/collection/%s/document", c.URL, path, ledger, collection)
 
 	payload, e := transaction.AsJSON()
 
 	if e != nil {
-		return e
+		return &Response{
+			Code: http.StatusInternalServerError,
+			Msg:  e.Error(),
+		}
 	}
 
 	req, err := http.NewRequest("PUT", reqURL, bytes.NewBuffer(payload))
 
 	if err != nil {
-		return err
+		return &Response{
+			Code: http.StatusInternalServerError,
+			Msg:  e.Error(),
+		}
 	}
 
 	req.Header.Set("accept", ": */*")
-	req.Header.Set("X-API-Key", c.apiKey)
+	req.Header.Set("X-API-Key", c.ApiKey)
 	req.Header.Set("Content-Type", contentType)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
 	defer resp.Body.Close()
-	return nil
+
+	return &Response{
+		Code: resp.StatusCode,
+		Msg:  resp.Status,
+	}
 }
 
-func (c *Client) GetTransactionByCustomerName(ledger string, collection string, name string) error {
+func (c *Client) GetTransactionByCustomerName(ledger string, collection string, name string) (*Response, *model.SearchResponse) {
 
 	const path = "ics/api/v1/ledger"
 	const contentType = "application/json"
 
-	reqURL := fmt.Sprintf("%s/%s/%s/collection/%s/documents/search", c.url, path, ledger, collection)
+	reqURL := fmt.Sprintf("%s/%s/%s/collection/%s/documents/search", c.URL, path, ledger, collection)
 
 	qry := query.Query{
 		Expressions: []query.Expression{
@@ -228,37 +243,49 @@ func (c *Client) GetTransactionByCustomerName(ledger string, collection string, 
 	data, err := json.Marshal(search)
 
 	if err != nil {
-		return err
+		return &Response{Code: http.StatusInternalServerError, Msg: err.Error()}, nil
 	}
 
 	req, err := http.NewRequest("POST", reqURL, bytes.NewBuffer(data))
 
 	if err != nil {
-		return err
+		return &Response{Code: http.StatusInternalServerError, Msg: err.Error()}, nil
 	}
 
 	req.Header.Set("accept", ": */*")
-	req.Header.Set("X-API-Key", c.apiKey)
+	req.Header.Set("X-API-Key", c.ApiKey)
 	req.Header.Set("Content-Type", contentType)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
+	defer resp.Body.Close()
 
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return &Response{Code: http.StatusInternalServerError, Msg: err.Error()}, nil
 	}
-	defer resp.Body.Close()
-	return nil
 
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return &Response{Code: http.StatusInternalServerError, Msg: err.Error()}, nil
+	}
+	// close response body
+	var docs model.SearchResponse
+	if err := json.Unmarshal(body, &docs); err != nil {
+		return &Response{Code: http.StatusInternalServerError, Msg: err.Error()}, nil
+	}
+
+	return &Response{
+		Code: resp.StatusCode,
+		Msg:  resp.Status,
+	}, &docs
 }
 
-func (c *Client) GetTransactionByCustomerUUID(ledger string, collection string, uuid string) error {
+func (c *Client) GetTransactionByCustomerUUID(ledger string, collection string, uuid string) (*Response, *model.SearchResponse) {
 
 	const path = "ics/api/v1/ledger"
 	const contentType = "application/json"
 
-	reqURL := fmt.Sprintf("%s/%s/%s/collection/%s/documents/search", c.url, path, ledger, collection)
+	reqURL := fmt.Sprintf("%s/%s/%s/collection/%s/documents/search", c.URL, path, ledger, collection)
 
 	qry := query.Query{
 		Expressions: []query.Expression{
@@ -291,17 +318,17 @@ func (c *Client) GetTransactionByCustomerUUID(ledger string, collection string, 
 	data, err := json.Marshal(search)
 
 	if err != nil {
-		return err
+		return &Response{Code: http.StatusInternalServerError, Msg: err.Error()}, nil
 	}
 
 	req, err := http.NewRequest("POST", reqURL, bytes.NewBuffer(data))
 
 	if err != nil {
-		return err
+		return &Response{Code: http.StatusInternalServerError, Msg: err.Error()}, nil
 	}
 
 	req.Header.Set("accept", ": */*")
-	req.Header.Set("X-API-Key", c.apiKey)
+	req.Header.Set("X-API-Key", c.ApiKey)
 	req.Header.Set("Content-Type", contentType)
 
 	client := &http.Client{}
@@ -309,7 +336,7 @@ func (c *Client) GetTransactionByCustomerUUID(ledger string, collection string, 
 
 	if err != nil {
 		fmt.Println(err)
-		return err
+		return &Response{Code: http.StatusInternalServerError, Msg: err.Error()}, nil
 	}
 	defer resp.Body.Close()
 
@@ -321,9 +348,12 @@ func (c *Client) GetTransactionByCustomerUUID(ledger string, collection string, 
 	// close response body
 	var docs model.SearchResponse
 	if err := json.Unmarshal(body, &docs); err != nil {
-		return err
+		return &Response{Code: http.StatusInternalServerError, Msg: err.Error()}, nil
 	}
 
-	return nil
+	return &Response{
+		Code: resp.StatusCode,
+		Msg:  resp.Status,
+	}, &docs
 
 }

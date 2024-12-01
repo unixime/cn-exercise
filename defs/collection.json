@@ -1,0 +1,55 @@
+{
+  "idFieldName": "string",
+  "fields": [
+  {
+    "name": "accountid",
+    "type": "STRING"
+  },
+  {
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "name": "iban",
+    "type": "STRING"
+  },
+  {
+    "name": "address",
+    "type": "STRING"
+  }
+  ],
+  "indexes": [
+  {
+    "fields": [
+      "accountid"
+    ],
+    "isUnique": true
+  },
+  {
+    "fields": [
+      "accountid",
+      "name",
+      "iban"
+    ],
+    "isUnique": true
+  },
+  {
+    "fields": [
+      "name"
+    ],
+    "isUnique": true
+  }
+  ]
+}
+
+
+//	customer := model.Customer{
+//		AccountID: 100,
+//		Name:      "John",
+//		IBAN:      1234567,
+//		Address:   "foo",
+//		Transactions: model.Transaction{
+//			Amount: 50,
+//			Type:   1,
+//		},
+//	}
