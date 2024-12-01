@@ -3,6 +3,11 @@ CodeNotary test exercise
 
 
 ```shell
+swag init -g cmd/server.go
+```
+
+
+```shell
 docker run -p 8081:8080 -p 3322:3322 --rm --name immudb codenotary/immudb:latest
 ```
 

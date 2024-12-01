@@ -3,11 +3,25 @@ package api
 import (
 	"cn-exercise/internal/client"
 	"cn-exercise/internal/model"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"net/http"
 )
 
+// PostTransaction godoc
+//
+//	@Summary		add a new transaction
+//	@Description	add a new transaction in the DB
+//	@Tags			transaction
+//	@Accept			json
+//	@Produce		json
+//	@Param			transaction		body		model.Transaction	true	"Add new transaction"
+//	@Success		200				{object}	model.Transaction
+//	@Failure		400				{object}	client.Response
+//	@Failure		404				{object}	client.Response
+//	@Failure		500				{object}	client.Response
+//	@Router			/transaction	 [post]
 func PostTransaction(client *client.Client) gin.HandlerFunc {
 
 	const ledger = "default"
@@ -17,6 +31,7 @@ func PostTransaction(client *client.Client) gin.HandlerFunc {
 		var newTransaction model.Transaction
 
 		if err := ctx.BindJSON(&newTransaction); err != nil {
+
 			ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		}
@@ -33,8 +48,21 @@ func PostTransaction(client *client.Client) gin.HandlerFunc {
 	return fn
 }
 
+// GetCustomerTransactions godoc
+//
+//	@Summary		get transactions
+//	@Description	get transaction by ID or account name
+//	@Tags			transaction
+//	@Accept			json
+//	@Produce		json
+//	@Param			uuid			query		int		true	"Get all transaction"
+//	@Param			name			query		string	true	"Get all transaction"
+//	@Success		200				{object}	[]model.Transaction
+//	@Failure		400				{object}	client.Response
+//	@Failure		404				{object}	client.Response
+//	@Failure		500				{object}	client.Response
+//	@Router			/transactions	 [get]
 func GetCustomerTransactions(httpClient *client.Client) gin.HandlerFunc {
-
 	const ledger = "default"
 	const collection = "transactions"
 

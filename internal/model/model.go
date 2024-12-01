@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+
 	"github.com/google/uuid"
 )
 
@@ -144,6 +145,7 @@ type Revision struct {
 	Transaction   Transaction `json:"document,omitempty"`
 }
 
+// SearchResponse is the representation
 type SearchResponse struct {
 	SearchId  string     `json:"searchId,omitempty"`
 	KeepOpen  bool       `json:"keepOpen,omitempty"`
