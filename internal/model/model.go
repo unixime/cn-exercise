@@ -20,52 +20,6 @@ type Collection interface {
 type Customers struct {
 }
 
-func (c *Customers) Name() string {
-	const name = "customers"
-
-	return name
-}
-
-func (c *Customers) AsJSON() []byte {
-	const data = `
-	{
-  		"idFieldName": "customers",
-  		"fields": [
-			{
-			  "name": "string",
-			  "type": "STRING"
-			},
-			{
-				name: "accountid",
-				type: "STRING",
-			},
-			{
-				"name": "address",
-				"type": "STRING",
-			},
-			{
-				"name": "iban",
-				"type": "STRING",	
-			},
-			{
-				"name": "balance",
-				"type": "DOUBLE",
-			}
-	  	],
-		"indexes": [
-			{
-			  "fields": [
-				"name",
-				"iban"
-			  ],
-			  "isUnique": true
-			}
-	  	]
-	}	`
-
-	return []byte(data)
-}
-
 type Transactions struct {
 	name string
 }
@@ -74,60 +28,60 @@ func (t *Transactions) Name() string {
 	return t.name
 }
 
-func (t *Transactions) AsJSON() []byte {
-	const def = `
-	{
-	  "fields": [
-	  {
-		"name": "uuid",
-		"type": "STRING"
-	  },
-	  {
-		"name": "name",
-		"type": "STRING"
-	  },
-	  {
-		"name": "iban",
-		"type": "STRING"
-	  },
-	  {
-		"name": "address",
-		"type": "STRING"
-	  },
-	  {
-		"name": "amount",
-		"type": "DOUBLE"
-	  },
-	  {
-		"name": "type",
-		"type": "INTEGER"
-	  }
-	  ],
-	  "indexes": [
-	  {
-		"fields": [
-		  "uuid"
-		],
-		"isUnique": false
-	  },
-	  {
-		"fields": [
-		  "name"
-		],
-		"isUnique": false
-	  },
-	  {
-		"fields": [
-		  "name",
-		  "type"
-		],
-		"isUnique": false
-	  }
-	  ]
-	}`
-	return []byte(def)
-
-}
+//func (t *Transactions) AsJSON() []byte {
+//	const def = `
+//	{
+//	  "fields": [
+//	  {
+//		"name": "uuid",
+//		"type": "STRING"
+//	  },
+//	  {
+//		"name": "name",
+//		"type": "STRING"
+//	  },
+//	  {
+//		"name": "iban",
+//		"type": "STRING"
+//	  },
+//	  {
+//		"name": "address",
+//		"type": "STRING"
+//	  },
+//	  {
+//		"name": "amount",
+//		"type": "DOUBLE"
+//	  },
+//	  {
+//		"name": "type",
+//		"type": "INTEGER"
+//	  }
+//	  ],
+//	  "indexes": [
+//	  {
+//		"fields": [
+//		  "uuid"
+//		],
+//		"isUnique": false
+//	  },
+//	  {
+//		"fields": [
+//		  "name"
+//		],
+//		"isUnique": false
+//	  },
+//	  {
+//		"fields": [
+//		  "name",
+//		  "type"
+//		],
+//		"isUnique": false
+//	  }
+//	  ]
+//	}`
+//	return []byte(def)
+//
+//}
 
 //func (c *Transactions) AsJSON() []byte {
 //	const data = `
@@ -164,19 +118,6 @@ type Payload struct {
 	Type        TYPE    `json:"type"`
 }
 
-func NewPayload(name string) *Payload {
-
-	return &Payload{
-		AccountID:   uuid.New(),
-		Name:        name,
-		BankAccount: 0,
-		Address:     "",
-		Amount:      0,
-		Type:        0,
-	}
-
-}
-
 type Transaction struct {
 	AccountID string  `json:"uuid"`
 	Name      string  `json:"name"`
@@ -209,23 +150,4 @@ type SearchResponse struct {
 	Revisions []Revision `json:"revisions,omitempty"`
 	Page      int        `json:"page"`
 	PerPage   int        `json:"perPage"`
-}
-
-type Customer struct {
-	AccountID    int    `json:"accountid"`
-	Name         string `json:"name"`
-	IBAN         int    `json:"iban"`
-	Address      string `json:"address,omitempty"`
-	Transactions Transaction
-}
-
-func (c *Customer) AsJSON() ([]byte, error) {
-
-	data, err := json.Marshal(c)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return data, err
 }

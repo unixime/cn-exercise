@@ -8,7 +8,6 @@ import (
 	"net/http"
 )
 
-// postAlbums adds an album from JSON received in the request body.
 func PostTransaction(client *client.Client) gin.HandlerFunc {
 
 	const ledger = "default"
