@@ -23,3 +23,16 @@ Resources:
 * API reference: https://vault.immudb.io/docs/api/v1
 
 
+## Missing requirements:
+
+* application frontend
+
+## ToDo
+
+* unit tests
+  * add `immodb vault` mock
+* code factorization :
+  * minimize code replication
+
+
+
