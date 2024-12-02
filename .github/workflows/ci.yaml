@@ -19,13 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
     - name: Checkout
-      uses: actions/checkout@master
-    - name: lint
-      uses: luke142367/Docker-Lint-Action@v1.0.0
+      uses: actions/checkout@v3
+    - name : linter
+      uses: hadolint/hadolint-action@v3.1.0
       with:
-        target: Dockerfile
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        dockerfile: ./build/docker/Dockerfile
 
   build:
 
@@ -33,7 +31,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Generate swagger sources
       uses: yegorrybchenko/go-swag-action@v0.1
       with:
@@ -72,7 +70,7 @@ jobs:
     needs: build
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Docker meta
       id: meta
       uses: docker/metadata-action@v5
