@@ -108,7 +108,7 @@ func (c *Client) GetTransactionByCustomerName(ledger string, collection string, 
 	qry := query.Query{
 		Expressions: []query.Expression{
 			{
-				[]query.Constraint{
+				FieldComparisons: []query.Constraint{
 					{
 						Field:    "name",
 						Operator: query.EQUAL,
@@ -199,7 +199,7 @@ func (c *Client) GetTransactionByCustomerUUID(ledger string, collection string, 
 	qry := query.Query{
 		Expressions: []query.Expression{
 			{
-				[]query.Constraint{
+				FieldComparisons: []query.Constraint{
 					{
 						Field:    "uuid",
 						Operator: query.EQUAL,

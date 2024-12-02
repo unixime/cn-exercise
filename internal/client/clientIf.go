@@ -1,14 +1,9 @@
 package client
 
-type ImmuDBClientIf interface {
-	Login(host string, port int, user string, password string) error
-	Logout() error
-	IsConnected() bool
-	CreateDatabase(name string) error
-	CreateTable(tableName string, tableDef string) error
-}
+import "cn-exercise/internal/model"
 
 type ClientIf interface {
-	Login(host string, port int, user string, password string) error
-	NewCollection() error
+	RegisterTransaction(ledger string, collection string, transaction *model.Transaction) *Response
+	GetTransactionByCustomerName(ledger string, collection string, name string) (*Response, *model.SearchResponse)
+	GetTransactionByCustomerUUID(ledger string, collection string, uuid string) (*Response, *model.SearchResponse)
 }

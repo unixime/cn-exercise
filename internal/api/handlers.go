@@ -99,27 +99,6 @@ func GetCustomerTransactions(httpClient *client.Client) gin.HandlerFunc {
 		r, data := hdl(ledger, collection, ctx.Query(key))
 		ctx.IndentedJSON(r.Code, data)
 
-		return
-		//customerName := ctx.Query("name")
-		//if customerName != "" {
-		//	r, data := client.GetTransactionByCustomerName(ledger, collection, customerName)
-		//
-		//	ctx.IndentedJSON(r.Code, data)
-		//
-		//	return
-		//
-		//}
-		//
-		//customerUUID := ctx.Query("id")
-		//if customerUUID != "" {
-		//	r, data := client.GetTransactionByCustomerUUID(ledger, collection, customerUUID)
-		//
-		//	ctx.IndentedJSON(r.Code, data)
-		//
-		//	return
-		//
-		//}
-
 	}
 
 	return fn

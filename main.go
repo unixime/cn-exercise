@@ -16,7 +16,10 @@ func init() {
 
 	viper.SetEnvPrefix("CN")
 	viper.AutomaticEnv()
-	viper.BindPFlags(pflag.CommandLine)
+	if e := viper.BindPFlags(pflag.CommandLine); e != nil {
+		fmt.Printf("%s: url", e.Error())
+		os.Exit(3)
+	}
 	pflag.Parse()
 
 }
@@ -49,8 +52,11 @@ func main() {
 		os.Exit(2)
 	}
 
-	cmd.StartServer(client.Client{
+	if err := cmd.StartServer(client.Client{
 		URL:    url,
 		ApiKey: ak,
-	})
+	}); err != nil {
+		fmt.Printf("%s: api-key", err.Error())
+		os.Exit(4)
+	}
 }
