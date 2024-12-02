@@ -8,15 +8,12 @@ COPY internal /go/src/cn-exercise/internal/
 
 WORKDIR /go/src/cn-exercise
 
-RUN go mod tidy
-
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -a -installsuffix cgo -o /go/bin/server cn-exercise
+RUN go mod tidy && \
+    CGO_ENABLED=0 go build -ldflags="-s -w" -a -installsuffix cgo -o /go/bin/server cn-exercise
 
 
 FROM scratch
 
-
-#ENV OPENAM_DEPLOY_URL=${OPENAM_DEPLOY_URL:-"http://openam:8080/openam"}
 COPY --from=builder /go/bin/server /app/server
 
 USER 1001
