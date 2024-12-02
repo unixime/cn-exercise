@@ -9,12 +9,9 @@ import (
 	"os"
 )
 
-//TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.</p>
-
 func init() {
 
-	pflag.String("url", "https://vault.immudb.io/", "")
+	pflag.String("url", "https://vault.immudb.io", "")
 	pflag.String("api-key", "", "")
 
 	viper.SetEnvPrefix("CN")
@@ -24,12 +21,36 @@ func init() {
 
 }
 
+func getParamValue(userInput, envVar string) (string, error) {
+	ui := viper.GetString(userInput)
+	if ui != "" {
+		return ui, nil
+	}
+
+	ev := os.Getenv(envVar)
+	if ev != "" {
+		return ev, nil
+	}
+
+	return "", fmt.Errorf("missing parameter")
+}
+
 func main() {
 
-	fmt.Println(os.Getenv("CN_URL"))
-	fmt.Println(viper.Get("url"))
+	url, e1 := getParamValue("url", "CN_URL")
+	if e1 != nil {
+		fmt.Printf("%s: url", e1.Error())
+		os.Exit(1)
+	}
+
+	ak, e2 := getParamValue("api-key", "CN_API_KEY")
+	if e2 != nil {
+		fmt.Printf("%s: api-key", e2.Error())
+		os.Exit(2)
+	}
+
 	cmd.StartServer(client.Client{
-		URL:    "https://vault.immudb.io",
-		ApiKey: "default.AIkWyayo4M8uOBVUbce3zg.DyHDJbEg9chloDI6deZ2ldxERsi_z-fxifUqgkNuzsH5TZ3y",
+		URL:    url,
+		ApiKey: ak,
 	})
 }

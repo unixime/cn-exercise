@@ -11,25 +11,19 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title           Swagger Example API
+// @title           CN API
 // @version         1.0
-// @description     This is a sample server celler server.
-// @termsOfService  http://swagger.io/terms/
+// @description     Simple server that allows adding and getting transaction from immudb vault.
 
-// @contact.name   API Support
-// @contact.url    http://www.swagger.io/support
-// @contact.email  support@swagger.io
+// @contact.name   Emanuele Piccinelli
+// @contact.email  emanuele.piccinelli@gmail.com
 
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @host      localhost:8080
-// @BasePath  /api/v1
+// @BasePath  /
 
-// @securityDefinitions.basic  BasicAuth
-
-// @externalDocs.description  OpenAPI
-// @externalDocs.url          https://swagger.io/resources/open-api/
 func StartServer(client client.Client) error {
 
 	server := gin.Default()

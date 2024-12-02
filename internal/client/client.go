@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"cn-exercise/internal/model"
 	"cn-exercise/internal/query"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 type Client struct {
@@ -69,8 +71,24 @@ func (c *Client) RegisterTransaction(ledger string, collection string, transacti
 	req.Header.Set("X-API-Key", c.ApiKey)
 	req.Header.Set("Content-Type", contentType)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	tr := &http.Transport{
+		//TLSClientConfig: &tls.Config{InsecureSkyVerify: true}, // <--- Problem
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	client := &http.Client{
+		Transport: tr,
+		Timeout:   time.Second * 30,
+	}
+
+	resp, errDo := client.Do(req)
+
+	if errDo != nil {
+		return &Response{
+			Code: http.StatusInternalServerError,
+			Msg:  errDo.Error(),
+		}
+	}
 
 	defer resp.Body.Close()
 
@@ -131,8 +149,24 @@ func (c *Client) GetTransactionByCustomerName(ledger string, collection string, 
 	req.Header.Set("X-API-Key", c.ApiKey)
 	req.Header.Set("Content-Type", contentType)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	client := &http.Client{
+		Transport: tr,
+		Timeout:   time.Second * 30,
+	}
+
+	resp, errDo := client.Do(req)
+
+	if errDo != nil {
+		return &Response{
+			Code: http.StatusInternalServerError,
+			Msg:  errDo.Error(),
+		}, nil
+	}
+
 	defer resp.Body.Close()
 
 	if err != nil {
@@ -206,10 +240,18 @@ func (c *Client) GetTransactionByCustomerUUID(ledger string, collection string, 
 	req.Header.Set("X-API-Key", c.ApiKey)
 	req.Header.Set("Content-Type", contentType)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 
-	if err != nil {
+	client := &http.Client{
+		Transport: tr,
+		Timeout:   time.Second * 30,
+	}
+
+	resp, errDo := client.Do(req)
+
+	if errDo != nil {
 		fmt.Println(err)
 		return &Response{Code: http.StatusInternalServerError, Msg: err.Error()}, nil
 	}
